@@ -1,0 +1,17 @@
+spring:
+  cloud:
+    discovery:
+      enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+eureka:
+  client:
+    enabled: false
+app:
+  jwt:
+    secret: local-dev-secret-key-for-payment-project-please-change
+    expiration: 86400000
+  redis:
+    enabled: false

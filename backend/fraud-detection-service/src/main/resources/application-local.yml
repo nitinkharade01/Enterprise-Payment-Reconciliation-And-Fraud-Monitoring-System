@@ -1,0 +1,19 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:${MONGO_URI:mongodb://localhost:27017/fraud_db}}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    register-with-eureka: true
+    fetch-registry: true
+
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  mongodb:
+    enabled: ${MONGODB_ENABLED:true}
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+

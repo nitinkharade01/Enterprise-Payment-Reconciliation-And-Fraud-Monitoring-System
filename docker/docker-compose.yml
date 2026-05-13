@@ -1,0 +1,229 @@
+name: enterprise-payment-reconciliation
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot123 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  discovery-server:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    environment:
+      SERVICE_NAME: discovery-server
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8761
+    ports:
+      - "8761:8761"
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    environment:
+      SERVICE_NAME: auth-service
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8081
+      AUTH_DB_URL: jdbc:mysql://mysql:3306/payment_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      EUREKA_URL: http://discovery-server:8761/eureka
+      JWT_SECRET: docker-local-secret-change-me-to-a-long-256-bit-value
+    ports:
+      - "8081:8081"
+
+  transaction-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+    environment:
+      SERVICE_NAME: transaction-service
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8082
+      TRANSACTION_DB_URL: jdbc:mysql://mysql:3306/payment_transaction_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      KAFKA_ENABLED: true
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EUREKA_URL: http://discovery-server:8761/eureka
+    ports:
+      - "8082:8082"
+
+  fraud-detection-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      mongo:
+        condition: service_started
+      kafka:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+    environment:
+      SERVICE_NAME: fraud-detection-service
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8083
+      MONGODB_URI: mongodb://mongo:27017/payment_fraud_db
+      KAFKA_ENABLED: true
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EUREKA_URL: http://discovery-server:8761/eureka
+    ports:
+      - "8083:8083"
+
+  reconciliation-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+    environment:
+      SERVICE_NAME: reconciliation-service
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8084
+      RECONCILIATION_DB_URL: jdbc:mysql://mysql:3306/payment_reconciliation_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      KAFKA_ENABLED: true
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EUREKA_URL: http://discovery-server:8761/eureka
+    ports:
+      - "8084:8084"
+
+  notification-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+    environment:
+      SERVICE_NAME: notification-service
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8085
+      NOTIFICATION_DB_URL: jdbc:mysql://mysql:3306/payment_notification_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      KAFKA_ENABLED: true
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EUREKA_URL: http://discovery-server:8761/eureka
+    ports:
+      - "8085:8085"
+
+  reporting-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_started
+    environment:
+      SERVICE_NAME: reporting-service
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8086
+      EUREKA_URL: http://discovery-server:8761/eureka
+    ports:
+      - "8086:8086"
+
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      transaction-service:
+        condition: service_started
+    environment:
+      SERVICE_NAME: api-gateway
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8080
+      EUREKA_URL: http://discovery-server:8761/eureka
+      FRONTEND_URL: http://localhost:5173
+      PUBLIC_BASE_URL: http://localhost:8080
+      JWT_SECRET: docker-local-secret-change-me-to-a-long-256-bit-value
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    depends_on:
+      api-gateway:
+        condition: service_started
+    ports:
+      - "5173:80"
+
+volumes:
+  mysql-data:
+  mongo-data:

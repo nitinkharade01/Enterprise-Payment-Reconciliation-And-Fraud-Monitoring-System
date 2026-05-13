@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    discovery:
+      enabled: ${EUREKA_ENABLED:false}
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates: [ Path=/api/auth/** ]
+        - id: transaction-service
+          uri: ${TRANSACTION_SERVICE_URL:http://localhost:8082}
+          predicates: [ Path=/api/transactions/** ]
+        - id: fraud-detection-service
+          uri: ${FRAUD_SERVICE_URL:http://localhost:8083}
+          predicates: [ Path=/api/fraud-alerts/** ]
+        - id: reconciliation-service
+          uri: ${RECONCILIATION_SERVICE_URL:http://localhost:8084}
+          predicates: [ Path=/api/reconciliation/** ]
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+          predicates: [ Path=/api/notifications/** ]
+        - id: reporting-service
+          uri: ${REPORTING_SERVICE_URL:http://localhost:8086}
+          predicates: [ Path=/api/reports/** ]
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:false}
+    register-with-eureka: false
+    fetch-registry: false
+
+app:
+  frontend-url: ${FRONTEND_URL}
+  public-url: ${PUBLIC_BASE_URL}

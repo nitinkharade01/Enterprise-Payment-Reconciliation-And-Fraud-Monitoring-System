@@ -1,0 +1,89 @@
+services:
+  - type: web
+    name: epay-auth-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: auth-service
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: EUREKA_ENABLED
+        value: false
+      - key: KAFKA_ENABLED
+        value: false
+      - key: REDIS_ENABLED
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: epay-postgres
+          property: connectionString
+      - fromGroup: epay-shared-secrets
+
+  - type: web
+    name: epay-transaction-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: transaction-service
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: EUREKA_ENABLED
+        value: false
+      - key: KAFKA_ENABLED
+        value: false
+      - key: REDIS_ENABLED
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: epay-postgres
+          property: connectionString
+
+  - type: web
+    name: epay-api-gateway
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: api-gateway
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: EUREKA_ENABLED
+        value: false
+      - key: KAFKA_ENABLED
+        value: false
+      - key: REDIS_ENABLED
+        value: false
+      - key: AUTH_SERVICE_URL
+        value: http://epay-auth-service:10000
+      - key: TRANSACTION_SERVICE_URL
+        value: http://epay-transaction-service:10000
+      - key: FRONTEND_URL
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGIN_PATTERNS
+        value: http://localhost:5173,https://*.vercel.app,https://*.netlify.app
+      - fromGroup: epay-shared-secrets
+
+databases:
+  - name: epay-postgres
+    plan: free
+    databaseName: epay
+    user: epay_user
+
+envVarGroups:
+  - name: epay-shared-secrets
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true

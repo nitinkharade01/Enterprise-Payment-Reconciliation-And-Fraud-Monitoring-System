@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:${PORT:8086}}
+spring:
+  profiles:
+    default: local
+  application:
+    name: reporting-service
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+app:
+  services:
+    transaction-url: ${TRANSACTION_SERVICE_URL:http://localhost:8082}
+    fraud-url: ${FRAUD_SERVICE_URL:http://localhost:8083}
+    reconciliation-url: ${RECONCILIATION_SERVICE_URL:http://localhost:8084}
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

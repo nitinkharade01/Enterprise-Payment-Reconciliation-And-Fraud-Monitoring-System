@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/payment_reconciliation_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DATABASE_USERNAME:${MYSQL_USER:root}}
+    password: ${DATABASE_PASSWORD:${MYSQL_PASSWORD:root123}}
+
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+

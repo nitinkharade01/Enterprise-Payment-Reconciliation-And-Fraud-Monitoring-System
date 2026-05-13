@@ -1,0 +1,16 @@
+target/
+*.class
+*.log
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
+.DS_Store
+node_modules/
+dist/
+.vite/
+.env
+*.iml
+.codex-run-logs/
+.recovery-tools/

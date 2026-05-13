@@ -1,0 +1,8 @@
+{
+  "info": { "name": "Enterprise Payment Reconciliation APIs", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "item": [
+    { "name": "Login", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "http://localhost:8080/api/auth/login", "body": { "mode": "raw", "raw": "{ \"email\": \"admin@payment.com\", \"password\": \"Admin@123\" }" } } },
+    { "name": "Create Transaction", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "http://localhost:8080/api/transactions", "body": { "mode": "raw", "raw": "{ \"userId\": 2, \"customerName\": \"Aarav Mehta\", \"sourceAccount\": \"ACC-1001\", \"destinationAccount\": \"ACC-9001\", \"amount\": 76000, \"currency\": \"INR\", \"paymentMode\": \"UPI\", \"remarks\": \"Invoice payment\" }" } } },
+    { "name": "Dashboard", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "http://localhost:8080/api/reports/dashboard" } }
+  ]
+}

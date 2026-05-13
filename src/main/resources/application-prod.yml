@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    properties:
+      hibernate:
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  redis:
+    enabled: ${REDIS_ENABLED:false}

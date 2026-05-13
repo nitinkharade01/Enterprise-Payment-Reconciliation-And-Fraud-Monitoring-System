@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${RECONCILIATION_DB_URL:jdbc:mysql://localhost:3306/payment_reconciliation_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root123}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    register-with-eureka: true
+    fetch-registry: true
+
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+

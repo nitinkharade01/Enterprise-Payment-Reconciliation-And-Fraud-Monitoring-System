@@ -1,0 +1,15 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+eureka:
+  client:
+    enabled: false
+app:
+  kafka:
+    enabled: false
+  redis:
+    enabled: false
+fraud:
+  amount-threshold: 50000

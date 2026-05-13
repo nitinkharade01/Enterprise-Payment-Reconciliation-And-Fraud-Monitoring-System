@@ -1,0 +1,37 @@
+server:
+  port: ${SERVER_PORT:${PORT:8081}}
+spring:
+  profiles:
+    default: local
+  application:
+    name: auth-service
+  datasource:
+    url: ${DATABASE_URL:${AUTH_DB_URL:jdbc:mysql://localhost:3306/payment_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}}
+    username: ${DATABASE_USERNAME:${MYSQL_USER:root}}
+    password: ${DATABASE_PASSWORD:${MYSQL_PASSWORD:root123}}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-to-a-very-long-256-bit-key}
+    expiration: ${JWT_EXPIRATION_MS:7200000}
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

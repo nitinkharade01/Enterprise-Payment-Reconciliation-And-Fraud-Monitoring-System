@@ -1,0 +1,8 @@
+eureka:
+  client:
+    enabled: false
+app:
+  kafka:
+    enabled: false
+  redis:
+    enabled: false

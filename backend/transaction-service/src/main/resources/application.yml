@@ -1,0 +1,40 @@
+server:
+  port: ${SERVER_PORT:${PORT:8082}}
+spring:
+  profiles:
+    default: local
+  application:
+    name: transaction-service
+  datasource:
+    url: ${DATABASE_URL:${TRANSACTION_DB_URL:jdbc:mysql://localhost:3306/payment_transaction_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}}
+    username: ${DATABASE_USERNAME:${MYSQL_USER:root}}
+    password: ${DATABASE_PASSWORD:${MYSQL_PASSWORD:root123}}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
