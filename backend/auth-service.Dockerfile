@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS build
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY backend ./backend
 
 WORKDIR /app/backend
 
-RUN mvn -B -DskipTests package
+RUN mvn -B -DskipTests -pl auth-service -am package
 
 FROM eclipse-temurin:17-jre
 
