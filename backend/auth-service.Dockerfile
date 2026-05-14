@@ -6,7 +6,7 @@ COPY backend ./backend
 
 WORKDIR /app/backend
 
-RUN mvn -B -DskipTests -pl auth-service -am package
+RUN mvn -B -DskipTests -pl auth-service -am package spring-boot:repackage
 
 FROM eclipse-temurin:17-jre
 
