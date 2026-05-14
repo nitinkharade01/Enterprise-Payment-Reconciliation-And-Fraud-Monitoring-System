@@ -3,7 +3,7 @@ services:
     name: epay-auth-service
     runtime: docker
     plan: free
-    dockerfilePath: ./backend/auth-service.Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
